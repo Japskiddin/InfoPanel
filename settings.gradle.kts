@@ -30,5 +30,5 @@ dependencyResolutionManagement {
 }
 
 include(
-    ":app",
+    ":sample",
 )
