@@ -30,9 +30,10 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.fab.setOnClickListener { view ->
-            binding.infoPanel.make(
+            InfoPanel.make(
+                parent = binding.root,
                 text = "Replace with your own action",
-                duration = InfoPanel.LENGTH_LONG,
+                duration = InfoPanel.DURATION_LONG,
                 action = "Action",
                 listener = object : View.OnClickListener {
                     override fun onClick(v: View?) {

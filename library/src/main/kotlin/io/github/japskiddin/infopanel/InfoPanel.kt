@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
@@ -16,7 +17,7 @@ import io.github.japskiddin.infopanel.utils.createRippleEffect
 import io.github.japskiddin.infopanel.utils.hideTranslateAnimation
 import io.github.japskiddin.infopanel.utils.showTranslateAnimation
 
-public class InfoPanel @JvmOverloads constructor(
+public class InfoPanel private constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = -1,
@@ -50,7 +51,10 @@ public class InfoPanel @JvmOverloads constructor(
     private val hideRunnable = Runnable { hide() }
 
     public val isNotEmpty: Boolean
-        get() = binding.tvDescription.text.isNotEmpty()
+        get() = binding.content.tvDescription.text.isNotEmpty()
+
+    public val isEmpty: Boolean
+        get() = binding.content.tvDescription.text.isEmpty()
 
     private val isVisibleOrInvisible: Boolean
         get() = isVisible || isInvisible
@@ -60,41 +64,13 @@ public class InfoPanel @JvmOverloads constructor(
 
     init {
         val ripple = createRippleEffect()
-        binding.tvAction.foreground = ripple
-    }
-
-    @JvmOverloads
-    public fun make(
-        @StringRes textRes: Int,
-        duration: Long,
-        @StringRes actionRes: Int? = null,
-        listener: OnClickListener? = null
-    ) {
-        val text = context.getString(textRes)
-        val action = if (actionRes != null) {
-            context.getString(actionRes)
-        } else {
-            ""
-        }
-        make(text, duration, action, listener)
-    }
-
-    @JvmOverloads
-    public fun make(
-        text: String,
-        duration: Long,
-        action: String,
-        listener: OnClickListener? = null
-    ) {
+        binding.content.tvAction.foreground = ripple
         hide(false)
         clear()
-        setDescription(text)
-        setAction(action, listener)
-        show()
-        handler.removeCallbacks(hideRunnable)
-        if (duration > 0L) {
-            handler.postDelayed(hideRunnable, duration)
-        }
+        layoutParams = ViewGroup.LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT
+        )
     }
 
     public fun dismiss() {
@@ -125,12 +101,11 @@ public class InfoPanel @JvmOverloads constructor(
     }
 
     private fun setDescription(text: String) {
-        binding.tvDescription.text = text
+        binding.content.tvDescription.text = text
     }
 
     private fun setAction(action: String, listener: OnClickListener?) {
-        if (action.isEmpty()) return
-        with(binding.tvAction) {
+        with(binding.content.tvAction) {
             visibility = VISIBLE
             text = action
             setOnClickListener(listener)
@@ -144,7 +119,7 @@ public class InfoPanel @JvmOverloads constructor(
     }
 
     private fun clearAction() {
-        with(binding.tvAction) {
+        with(binding.content.tvAction) {
             text = ""
             visibility = GONE
             setOnClickListener(null)
@@ -158,11 +133,61 @@ public class InfoPanel @JvmOverloads constructor(
     private fun hideInternal() {
         visibility = GONE
         clear()
+        (parent as? ViewGroup)?.removeView(this)
     }
 
     public companion object {
-        public const val LENGTH_LONG: Long = 5000L
-        public const val LENGTH_SHORT: Long = 3000L
-        public const val LENGTH_INDEFINITE: Long = -1L
+        public const val DURATION_LONG: Long = 5000L
+        public const val DURATION_SHORT: Long = 3000L
+        public const val DURATION_INDEFINITE: Long = -1L
+
+        @JvmOverloads
+        @JvmStatic
+        public fun make(
+            parent: ViewGroup,
+            @StringRes textRes: Int,
+            duration: Long,
+            @StringRes actionRes: Int? = null,
+            listener: OnClickListener? = null
+        ): InfoPanel {
+            val context = parent.context
+            val text = context.getString(textRes)
+            val action = if (actionRes != null) {
+                context.getString(actionRes)
+            } else {
+                ""
+            }
+            return makeInternal(parent, text, duration, action, listener)
+        }
+
+        @JvmOverloads
+        @JvmStatic
+        public fun make(
+            parent: ViewGroup,
+            text: String,
+            duration: Long,
+            action: String,
+            listener: OnClickListener? = null
+        ): InfoPanel = makeInternal(parent, text, duration, action, listener)
+
+        private fun makeInternal(
+            parent: ViewGroup,
+            text: String,
+            duration: Long,
+            action: String,
+            listener: OnClickListener? = null
+        ): InfoPanel =
+            InfoPanel(parent.context)
+                .apply {
+                    setDescription(text)
+                    if (action.isNotEmpty()) {
+                        setAction(action, listener)
+                    }
+                    show()
+                    if (duration > 0L) {
+                        handler.postDelayed(hideRunnable, duration)
+                    }
+                }
+                .also { parent.addView(it) }
     }
 }
