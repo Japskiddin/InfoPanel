@@ -12,9 +12,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import io.github.japskiddin.infopanel.databinding.InfoPanelBinding
+import io.github.japskiddin.infopanel.utils.createRippleEffect
 import io.github.japskiddin.infopanel.utils.hideTranslateAnimation
 import io.github.japskiddin.infopanel.utils.showTranslateAnimation
-import kotlinx.coroutines.Runnable
 
 public class InfoPanel @JvmOverloads constructor(
     context: Context,
@@ -22,31 +22,29 @@ public class InfoPanel @JvmOverloads constructor(
     defStyleAttr: Int = -1,
 ) : FrameLayout(context, attrs, defStyleAttr) {
     private val binding = InfoPanelBinding.inflate(LayoutInflater.from(context), this, true)
+    private val showAnimationListener = object : Animation.AnimationListener {
+        override fun onAnimationStart(animation: Animation) {
+            showInternal()
+        }
+
+        override fun onAnimationEnd(animation: Animation) = Unit
+
+        override fun onAnimationRepeat(animation: Animation) = Unit
+    }
+    private val hideAnimationListener = object : Animation.AnimationListener {
+        override fun onAnimationStart(animation: Animation) = Unit
+
+        override fun onAnimationEnd(animation: Animation) {
+            hideInternal()
+        }
+
+        override fun onAnimationRepeat(animation: Animation) = Unit
+    }
     private val showAnimation = showTranslateAnimation.apply {
-        setAnimationListener(
-            object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) {
-                    showInternal()
-                }
-
-                override fun onAnimationEnd(animation: Animation) = Unit
-
-                override fun onAnimationRepeat(animation: Animation) = Unit
-            }
-        )
+        setAnimationListener(showAnimationListener)
     }
     private val hideAnimation = hideTranslateAnimation.apply {
-        setAnimationListener(
-            object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation) = Unit
-
-                override fun onAnimationEnd(animation: Animation) {
-                    hideInternal()
-                }
-
-                override fun onAnimationRepeat(animation: Animation) = Unit
-            }
-        )
+        setAnimationListener(hideAnimationListener)
     }
     private val handler = Handler(Looper.getMainLooper())
     private val hideRunnable = Runnable { hide() }
@@ -59,6 +57,11 @@ public class InfoPanel @JvmOverloads constructor(
 
     private val isGoneOrInvisible: Boolean
         get() = isGone || isInvisible
+
+    init {
+        val ripple = createRippleEffect()
+        binding.tvAction.foreground = ripple
+    }
 
     @JvmOverloads
     public fun make(
@@ -125,19 +128,27 @@ public class InfoPanel @JvmOverloads constructor(
         binding.tvDescription.text = text
     }
 
-    private fun setAction(text: String, listener: OnClickListener?) {
-        if (text.isEmpty()) return
-        binding.tvAction.visibility = VISIBLE
-        binding.tvAction.text = text
-        binding.tvAction.setOnClickListener(listener)
+    private fun setAction(action: String, listener: OnClickListener?) {
+        if (action.isEmpty()) return
+        with(binding.tvAction) {
+            visibility = VISIBLE
+            text = action
+            setOnClickListener(listener)
+        }
     }
 
     private fun clear() {
-        binding.tvDescription.text = ""
-        binding.tvAction.text = ""
-        binding.tvAction.visibility = GONE
-        binding.tvAction.setOnClickListener(null)
+        setDescription("")
+        clearAction()
         handler.removeCallbacks(hideRunnable)
+    }
+
+    private fun clearAction() {
+        with(binding.tvAction) {
+            text = ""
+            visibility = GONE
+            setOnClickListener(null)
+        }
     }
 
     private fun showInternal() {
