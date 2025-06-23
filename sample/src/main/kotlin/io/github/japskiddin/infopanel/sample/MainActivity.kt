@@ -3,12 +3,14 @@ package io.github.japskiddin.infopanel.sample
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.snackbar.Snackbar
+import io.github.japskiddin.infopanel.InfoPanel
 import io.github.japskiddin.infopanel.sample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -28,9 +30,16 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+            binding.infoPanel.make(
+                text = "Replace with your own action",
+                duration = InfoPanel.LENGTH_LONG,
+                action = "Action",
+                listener = object : View.OnClickListener {
+                    override fun onClick(v: View?) {
+                        Toast.makeText(this@MainActivity, "Action clicked", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
         }
     }
 

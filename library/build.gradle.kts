@@ -12,11 +12,13 @@ kotlin {
 
 android {
     namespace = "io.github.japskiddin.infopanel"
+
+    buildFeatures {
+        androidResources = true
+    }
 }
 
 dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
 }
