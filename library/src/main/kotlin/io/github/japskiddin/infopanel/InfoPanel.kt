@@ -4,18 +4,23 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import io.github.japskiddin.infopanel.databinding.InfoPanelBinding
+import io.github.japskiddin.infopanel.utils.InsetsPadding
+import io.github.japskiddin.infopanel.utils.applyWindowInsetsPadding
 import io.github.japskiddin.infopanel.utils.createRippleEffect
 import io.github.japskiddin.infopanel.utils.hideTranslateAnimation
 import io.github.japskiddin.infopanel.utils.showTranslateAnimation
+import java.util.EnumSet
 
 public class InfoPanel private constructor(
     context: Context,
@@ -67,9 +72,11 @@ public class InfoPanel private constructor(
         binding.content.tvAction.foreground = ripple
         hide(false)
         clear()
-        layoutParams = ViewGroup.LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            LayoutParams.MATCH_PARENT
+        binding.content.root.applyWindowInsetsPadding(
+            mask = WindowInsetsCompat.Type.displayCutout()
+                or WindowInsetsCompat.Type.systemBars()
+                or WindowInsetsCompat.Type.ime(),
+            paddings = EnumSet.of(InsetsPadding.BOTTOM, InsetsPadding.LEFT, InsetsPadding.RIGHT),
         )
     }
 
@@ -188,6 +195,13 @@ public class InfoPanel private constructor(
                         handler.postDelayed(hideRunnable, duration)
                     }
                 }
-                .also { parent.addView(it) }
+                .also { view ->
+                    val layoutParams = LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.MATCH_PARENT,
+                        Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+                    )
+                    parent.addView(view, layoutParams)
+                }
     }
 }
