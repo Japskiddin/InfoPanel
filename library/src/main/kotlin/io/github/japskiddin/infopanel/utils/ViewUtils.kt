@@ -5,7 +5,10 @@ import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.FrameLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.updatePadding
@@ -98,6 +101,18 @@ internal fun createRippleEffect(): RippleDrawable {
         color = ColorStateList.valueOf(RIPPLE_MASK_COLOR.toColorInt())
     }
     return RippleDrawable(rippleColor, null, mask)
+}
+
+internal fun View?.findSuitableParent(): ViewGroup {
+    var current = this
+    do {
+        if (current is FrameLayout || current is CoordinatorLayout) {
+            return current
+        }
+        val parent = current?.parent
+        current = parent as? View
+    } while (current != null)
+    throw IllegalArgumentException("No suitable parent found for InfoPanel, should be FrameLayout or CoordinatorLayout")
 }
 
 private fun Float.toDp(): Float = this * density

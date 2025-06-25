@@ -20,5 +20,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.annotation)
+    implementation(libs.androidx.coordinatorlayout)
     implementation(libs.androidx.core.ktx)
 }

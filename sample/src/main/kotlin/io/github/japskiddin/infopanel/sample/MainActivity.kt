@@ -3,7 +3,6 @@ package io.github.japskiddin.infopanel.sample
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -31,16 +30,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.fab.setOnClickListener { view ->
             InfoPanel.make(
-                parent = binding.root,
-                text = "Replace with your own action",
+                view = binding.root,
+                message = "Replace with your own action",
                 duration = InfoPanel.DURATION_LONG,
-                action = "Action",
-                listener = object : View.OnClickListener {
-                    override fun onClick(v: View?) {
-                        Toast.makeText(this@MainActivity, "Action clicked", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
+            ).setAction("Action") {
+                Toast.makeText(this, "Action clicked", Toast.LENGTH_SHORT).show()
+            }.show()
         }
     }
 

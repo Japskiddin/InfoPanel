@@ -15,11 +15,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             }
 
             androidConfig {
-                buildFeatures {
-                    buildConfig = true
-                    viewBinding = true
-                }
-
                 configureKotlinJvm()
                 configureKotlinAndroid(this)
             }
